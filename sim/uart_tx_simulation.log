@@ -1,0 +1,32 @@
+UART TX Simulation Results
+==========================
+
+Testbench: tb_uart_tx
+Module under test: uart_tx
+Clock period: 10 ns
+Baud divisor: 4
+Transmitted data: 8'hA5
+
+Simulation Output:
+-----------------
+
+time=0 rst_n=0 start=0 tx=1 busy=0 done=0
+RESET RELEASED
+time=30000 rst_n=1 start=0 tx=1 busy=0 done=0
+TRANSMIT REQUEST
+time=50000 rst_n=1 start=1 tx=1 busy=0 done=0
+time=55000 rst_n=1 start=1 tx=1 busy=1 done=0
+time=60000 rst_n=1 start=0 tx=1 busy=1 done=0
+time=65000 rst_n=1 start=0 tx=0 busy=1 done=0
+time=105000 rst_n=1 start=0 tx=1 busy=1 done=0
+time=145000 rst_n=1 start=0 tx=0 busy=1 done=0
+time=185000 rst_n=1 start=0 tx=1 busy=1 done=0
+time=225000 rst_n=1 start=0 tx=0 busy=1 done=0
+time=305000 rst_n=1 start=0 tx=1 busy=1 done=0
+time=345000 rst_n=1 start=0 tx=0 busy=1 done=0
+time=385000 rst_n=1 start=0 tx=1 busy=1 done=0
+time=455000 rst_n=1 start=0 tx=1 busy=0 done=1
+time=465000 rst_n=1 start=0 tx=1 busy=0 done=0
+DIAGNOSTIC FINISHED
+
+$finish called at time 560 ns
