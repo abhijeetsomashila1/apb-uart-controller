@@ -87,8 +87,6 @@ apb-uart-controller/
 └── README.md
 ```
 
-*Make sure the filenames above match the files actually present in your repository.*
-
 ## Verification and Simulation Results
 
 The design was verified using Verilog testbenches in AMD Vivado 2025.2.
