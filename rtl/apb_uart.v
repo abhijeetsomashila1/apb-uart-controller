@@ -26,20 +26,21 @@ module apb_uart (
     assign PSLVERR = 1'b0;
 
     reg [7:0] tx_data;
-    reg [7:0] rx_data;
-    reg       rx_valid;
     reg [1:0] ctrl;
     reg [31:0] baud_div;
-
     reg tx_start;
+
     wire tx_busy;
     wire tx_done;
+
+    wire [7:0] rx_data;
+    wire rx_valid;
 
     wire apb_access = PSEL && PENABLE;
     wire apb_write  = apb_access && PWRITE;
     wire apb_read   = apb_access && !PWRITE;
 
-    // UART transmitter instance
+    // UART transmitter
     uart_tx uart_tx_inst (
         .clk      (PCLK),
         .rst_n    (PRESETn),
@@ -51,17 +52,24 @@ module apb_uart (
         .tx_done  (tx_done)
     );
 
-    // APB registers and transmit request
+    // UART receiver
+    uart_rx uart_rx_inst (
+        .clk      (PCLK),
+        .rst_n    (PRESETn),
+        .rx       (uart_rx),
+        .baud_div (baud_div),
+        .rx_data  (rx_data),
+        .rx_valid (rx_valid)
+    );
+
+    // APB register write logic
     always @(posedge PCLK or negedge PRESETn) begin
         if (!PRESETn) begin
             tx_data  <= 8'h00;
-            rx_data  <= 8'h00;
-            rx_valid <= 1'b0;
             ctrl     <= 2'b11;
             baud_div <= 32'd434;
             tx_start <= 1'b0;
         end else begin
-            // Default: transmit request is a one-cycle pulse
             tx_start <= 1'b0;
 
             if (apb_write) begin
@@ -88,7 +96,7 @@ module apb_uart (
         end
     end
 
-    // APB read logic
+    // APB register read logic
     always @(*) begin
         PRDATA = 32'h00000000;
 
