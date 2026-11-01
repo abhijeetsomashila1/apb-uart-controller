@@ -30,3 +30,36 @@ time=465000 rst_n=1 start=0 tx=1 busy=0 done=0
 DIAGNOSTIC FINISHED
 
 $finish called at time 560 ns
+
+## APB-to-UART Integration Simulation
+
+**Testbench:** `tb_apb_uart.v`
+
+**Transmitted data:** `0xA5`
+
+**Clock period:** 20 ns
+
+**Baud divisor:** 434
+
+**Simulation duration:** 100 µs
+
+### Simulation Output
+
+```text
+time=8810000 reset=1 APB_write=0 uart_tx=1 busy=1 done=0
+time=17490000 reset=1 APB_write=0 uart_tx=0 busy=1 done=0
+time=26170000 reset=1 APB_write=0 uart_tx=1 busy=1 done=0
+time=34850000 reset=1 APB_write=0 uart_tx=0 busy=1 done=0
+time=52210000 reset=1 APB_write=0 uart_tx=1 busy=1 done=0
+time=60890000 reset=1 APB_write=0 uart_tx=0 busy=1 done=0
+time=69570000 reset=1 APB_write=0 uart_tx=1 busy=1 done=0
+
+PASS: UART transmission completed.
+
+time=86910000 reset=1 APB_write=0 uart_tx=1 busy=0 done=1
+time=86930000 reset=1 APB_write=0 uart_tx=1 busy=0 done=0
+
+$finish called at time : 86940 ns
+```
+
+**Result:** APB-triggered UART transmission completed successfully.

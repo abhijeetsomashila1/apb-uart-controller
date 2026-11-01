@@ -1,9 +1,9 @@
+
 `timescale 1ns / 1ps
 
 module apb_uart (
     input  wire        PCLK,
     input  wire        PRESETn,
-
     input  wire        PSEL,
     input  wire        PENABLE,
     input  wire        PWRITE,
@@ -12,54 +12,69 @@ module apb_uart (
     output reg  [31:0] PRDATA,
     output wire        PREADY,
     output wire        PSLVERR,
-
-    output reg         uart_tx,
+    output wire        uart_tx,
     input  wire        uart_rx
 );
 
-    // Register addresses
     localparam ADDR_DATA    = 32'h00;
     localparam ADDR_STATUS  = 32'h04;
     localparam ADDR_CTRL    = 32'h08;
     localparam ADDR_BAUDDIV = 32'h0C;
     localparam ADDR_VERSION = 32'h10;
 
-    // APB response
     assign PREADY  = 1'b1;
     assign PSLVERR = 1'b0;
 
-    // Registers
-    reg [7:0]  tx_data;
-    reg [7:0]  rx_data;
-    reg        tx_busy;
-    reg        rx_valid;
-    reg [1:0]  ctrl;
+    reg [7:0] tx_data;
+    reg [7:0] rx_data;
+    reg       rx_valid;
+    reg [1:0] ctrl;
     reg [31:0] baud_div;
+
+    reg tx_start;
+    wire tx_busy;
+    wire tx_done;
 
     wire apb_access = PSEL && PENABLE;
     wire apb_write  = apb_access && PWRITE;
     wire apb_read   = apb_access && !PWRITE;
 
-    // Sequential register writes and reset
+    // UART transmitter instance
+    uart_tx uart_tx_inst (
+        .clk      (PCLK),
+        .rst_n    (PRESETn),
+        .tx_start (tx_start),
+        .tx_data  (tx_data),
+        .baud_div (baud_div),
+        .tx       (uart_tx),
+        .busy     (tx_busy),
+        .tx_done  (tx_done)
+    );
+
+    // APB registers and transmit request
     always @(posedge PCLK or negedge PRESETn) begin
         if (!PRESETn) begin
             tx_data  <= 8'h00;
             rx_data  <= 8'h00;
-            tx_busy  <= 1'b0;
             rx_valid <= 1'b0;
             ctrl     <= 2'b11;
-            baud_div <= 32'd27;
-            uart_tx  <= 1'b1;
+            baud_div <= 32'd434;
+            tx_start <= 1'b0;
         end else begin
+            // Default: transmit request is a one-cycle pulse
+            tx_start <= 1'b0;
+
             if (apb_write) begin
                 case (PADDR)
                     ADDR_DATA: begin
-                        tx_data <= PWDATA[7:0];
+                        if (!tx_busy) begin
+                            tx_data  <= PWDATA[7:0];
+                            tx_start <= 1'b1;
+                        end
                     end
 
-                    ADDR_CTRL: begin
+                    ADDR_CTRL:
                         ctrl <= PWDATA[1:0];
-                    end
 
                     ADDR_BAUDDIV: begin
                         if (PWDATA != 0)
@@ -73,38 +88,31 @@ module apb_uart (
         end
     end
 
-    // APB read mux
+    // APB read logic
     always @(*) begin
         PRDATA = 32'h00000000;
 
         if (apb_read) begin
             case (PADDR)
-                ADDR_DATA: begin
+                ADDR_DATA:
                     PRDATA = {24'h0, rx_data};
-                end
 
-                ADDR_STATUS: begin
+                ADDR_STATUS:
                     PRDATA = {30'h0, rx_valid, tx_busy};
-                end
 
-                ADDR_CTRL: begin
+                ADDR_CTRL:
                     PRDATA = {30'h0, ctrl};
-                end
 
-                ADDR_BAUDDIV: begin
+                ADDR_BAUDDIV:
                     PRDATA = baud_div;
-                end
 
-                ADDR_VERSION: begin
+                ADDR_VERSION:
                     PRDATA = 32'h00010000;
-                end
 
-                default: begin
+                default:
                     PRDATA = 32'h00000000;
-                end
             endcase
         end
     end
 
 endmodule
-
