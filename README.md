@@ -208,6 +208,6 @@ The simulation results demonstrate successful standalone UART transmission and r
 
 ## Author
 
-**Name:** Abhijeet Somashila  
+**Name:** Abhijeet Somashila and Pradhamesh Bingi
 **Institution:** JB Institute of Engineering and Technology 
 **Department:** Electronics and Communications Engineering
